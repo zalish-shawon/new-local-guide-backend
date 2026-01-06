@@ -5,6 +5,7 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import { TourRoutes } from './app/modules/tour/tour.route';
 import { BookingRoutes } from './app/modules/booking/booking.route';
+import { PaymentRoutes } from './app/modules/payment/payment.route';
 
 const app: Application = express();
 

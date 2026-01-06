@@ -1,44 +1,51 @@
 import { Request, Response } from 'express';
-import { Payment } from './payment.model';
+import { PaymentService } from './payment.service';
 import { Booking } from '../booking/booking.model';
-import mongoose from 'mongoose';
+import { Payment } from './payment.model';
 
-const makePayment = async (req: Request, res: Response) => {
-  const session = await mongoose.startSession();
+// 1. Create Payment Intent (Used by Frontend to show Payment Form)
+const createPaymentIntent = async (req: Request, res: Response) => {
   try {
-    session.startTransaction();
-    const { bookingId, amount, transactionId } = req.body;
-
-    // 1. Create Payment Record
-    const payment = await Payment.create([{
-      bookingId,
-      amount,
-      transactionId,
-      status: 'paid'
-    }], { session });
-
-    // 2. Update Booking Status to 'confirmed' (or 'paid')
-    await Booking.findByIdAndUpdate(
-      bookingId,
-      { status: 'confirmed' },
-      { session }
-    );
-
-    await session.commitTransaction();
-    session.endSession();
+    const { bookingId } = req.body;
+    const result = await PaymentService.createPaymentIntent(bookingId);
 
     res.status(200).json({
       success: true,
-      message: 'Payment recorded and Booking Confirmed',
-      data: payment[0],
+      message: 'Payment Intent created successfully',
+      data: result,
     });
   } catch (err: any) {
-    await session.abortTransaction();
-    session.endSession();
     res.status(500).json({ success: false, message: err.message, error: err });
   }
 };
 
+// Let's add a manual "Confirm Payment" endpoint that Frontend calls after Stripe success.
+const confirmPayment = async (req: Request, res: Response) => {
+    try {
+        const { bookingId, transactionId } = req.body;
+
+        // Update Booking
+        await Booking.findByIdAndUpdate(bookingId, { status: 'confirmed' });
+        
+        // Create Payment Record
+        await Payment.create({
+            bookingId,
+            transactionId,
+            amount: 0, // You might want to fetch real amount or pass it
+            status: 'paid'
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Payment confirmed successfully',
+            data: {}
+        });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
 export const PaymentController = {
-  makePayment,
+  createPaymentIntent,
+  confirmPayment
 };
