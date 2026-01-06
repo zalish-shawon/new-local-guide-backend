@@ -17,6 +17,7 @@ app.use(cors()); // Allow frontend to connect
 app.use('/api/v1/auth', AuthRoutes);
 app.use('/api/v1/tours', TourRoutes);
 app.use('/api/v1/bookings', BookingRoutes);
+app.use('/api/v1/payments', PaymentRoutes);
 // Test Route (Optional, just to check if server is running)
 app.get('/', (req: Request, res: Response) => {
   res.send('Local Guide Platform Backend is Running!');
