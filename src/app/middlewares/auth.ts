@@ -4,7 +4,6 @@ import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
 import { User } from '../modules/user/user.model';
 
-// Extend Request interface to include user
 declare global {
   namespace Express {
     interface Request {
@@ -16,10 +15,15 @@ declare global {
 const auth = (...requiredRoles: TUserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const token = req.headers.authorization;
+      let token = req.headers.authorization;
 
       if (!token) {
         throw new Error('You are not authorized!');
+      }
+
+      // FIX: Check if token starts with "Bearer " and remove it
+      if (token.startsWith('Bearer ')) {
+        token = token.slice(7, token.length).trimLeft();
       }
 
       // Verify Token
@@ -36,7 +40,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
         throw new Error('User not found!');
       }
 
-      // Check Role
       if (requiredRoles.length && !requiredRoles.includes(role)) {
         throw new Error('You are not authorized to perform this action');
       }
