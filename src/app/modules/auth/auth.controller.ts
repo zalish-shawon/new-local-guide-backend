@@ -22,13 +22,14 @@ const register = async (req: Request, res: Response) => {
 const login = async (req: Request, res: Response) => {
   try {
     const result = await AuthService.loginUser(req.body);
-    const { accessToken } = result;
+    const { accessToken, user } = result;
 
     res.status(200).json({
       success: true,
       message: 'User logged in successfully',
       data: {
         accessToken,
+        user,
       },
     });
   } catch (err: any) {

@@ -6,6 +6,7 @@ import notFound from './app/middlewares/notFound';
 import { TourRoutes } from './app/modules/tour/tour.route';
 import { BookingRoutes } from './app/modules/booking/booking.route';
 import { PaymentRoutes } from './app/modules/payment/payment.route';
+import { UserRoutes } from './app/modules/user/user.route';
 
 const app: Application = express();
 
@@ -19,6 +20,7 @@ app.use('/api/v1/auth', AuthRoutes);
 app.use('/api/v1/tours', TourRoutes);
 app.use('/api/v1/bookings', BookingRoutes);
 app.use('/api/v1/payments', PaymentRoutes);
+app.use('/api/v1/users', UserRoutes);
 // Test Route (Optional, just to check if server is running)
 app.get('/', (req: Request, res: Response) => {
   res.send('Local Guide Platform Backend is Running!');

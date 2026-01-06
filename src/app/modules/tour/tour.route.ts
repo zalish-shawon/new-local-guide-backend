@@ -18,4 +18,11 @@ router.post(
   TourController.createTour
 );
 
+// Add DELETE route
+router.delete(
+  '/:id', 
+  auth('admin', 'guide'), // Admins and Guides can delete
+  TourController.deleteTour // Ensure this method exists in your controller!
+);
+
 export const TourRoutes = router;
