@@ -1,0 +1,21 @@
+import express from 'express';
+import { TourController } from './tour.controller';
+import auth from '../../middlewares/auth';
+import { TourValidation } from './tour.validation';
+// You can use a validation middleware here (e.g. validateRequest(schema))
+
+const router = express.Router();
+
+// Public Routes
+router.get('/', TourController.getAllTours);
+router.get('/:id', TourController.getSingleTour);
+
+// Protected Routes (Only Guides and Admins can create tours)
+router.post(
+  '/create-tour', 
+  auth('guide', 'admin'), 
+  // validateRequest(TourValidation.createTourValidationSchema), // Add validation middleware if you have it
+  TourController.createTour
+);
+
+export const TourRoutes = router;

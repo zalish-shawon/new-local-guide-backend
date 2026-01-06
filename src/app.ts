@@ -3,6 +3,7 @@ import cors from 'cors';
 import { AuthRoutes } from './app/modules/auth/auth.route';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
+import { TourRoutes } from './app/modules/tour/tour.route';
 
 const app: Application = express();
 
@@ -13,7 +14,7 @@ app.use(cors()); // Allow frontend to connect
 // Application Routes
 // We will add more routes here (e.g., /api/v1/tours) later
 app.use('/api/v1/auth', AuthRoutes);
-
+app.use('/api/v1/tours', TourRoutes);
 // Test Route (Optional, just to check if server is running)
 app.get('/', (req: Request, res: Response) => {
   res.send('Local Guide Platform Backend is Running!');
