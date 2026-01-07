@@ -22,6 +22,25 @@ const createTour = async (req: Request, res: Response) => {
   }
 };
 
+
+const updateTour = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await Tour.findByIdAndUpdate(id, req.body, {
+      new: true, // Return the updated document
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Tour updated successfully',
+      data: result,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message, error: err });
+  }
+};
+
 const getAllTours = async (req: Request, res: Response) => {
   try {
     const result = await TourService.getAllTours();
@@ -66,6 +85,7 @@ const deleteTour = async (req: Request, res: Response) => {
 
 export const TourController = {
   createTour,
+  updateTour,
   getAllTours,
   getSingleTour,
   deleteTour,

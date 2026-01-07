@@ -18,6 +18,13 @@ router.post(
   TourController.createTour
 );
 
+// Add PATCH route
+router.patch(
+  '/:id', 
+  auth('admin', 'guide'), 
+  TourController.updateTour
+);
+
 // Add DELETE route
 router.delete(
   '/:id', 
