@@ -58,6 +58,28 @@ const getAllBookings = async (req: Request, res: Response) => {
   }
 };
 
+
+
+// Add this if missing
+const getSingleBooking = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    // Populate tour and tourist details for the invoice
+    const result = await Booking.findById(id)
+      .populate('tour')
+      .populate('tourist', 'name email');
+
+    res.status(200).json({
+      success: true,
+      message: 'Booking retrieved successfully',
+      data: result,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
 const updateStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -112,6 +134,7 @@ const createPaymentIntent = async (req: Request, res: Response) => {
 export const BookingController = {
   createBooking,
   getAllBookings,
+  getSingleBooking,
   updateStatus,
   createPaymentIntent,
 };

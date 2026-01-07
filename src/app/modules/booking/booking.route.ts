@@ -18,6 +18,12 @@ router.get(
   BookingController.getAllBookings
 );
 
+router.get(
+  '/:id', 
+  auth('admin', 'guide', 'tourist'), // Anyone involved can view it
+  BookingController.getSingleBooking
+);
+
 // 3. Update Status (Guide or Admin Only)
 router.patch(
   '/:id/status',
