@@ -45,7 +45,50 @@ const confirmPayment = async (req: Request, res: Response) => {
     }
 }
 
+
+const confirmationService = async (req: Request, res: Response) => {
+  try {
+    const { transactionId, bookingId, status } = req.body;
+
+    // 1. 🔍 FIND THE BOOKING FIRST
+    // We need to find the booking to know how much money was actually paid.
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
+    // 2. 🚨 CRITICAL FIX: Get the price from the Booking
+    // If we don't do this, it defaults to 0
+    const realAmount = booking.totalPrice || 0; 
+
+    // 3. Create the Payment Record with the REAL Amount
+    const result = await Payment.create({
+      bookingId,
+      transactionId,
+      status: status || 'paid',
+      amount: realAmount, // <--- THIS WAS MISSING OR 0 BEFORE
+    });
+
+    // 4. Update Booking Status to Confirmed (Optional, if not done elsewhere)
+    await Booking.findByIdAndUpdate(bookingId, { 
+      status: 'confirmed', 
+      isPaid: true,
+      paidAmount: realAmount 
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment verified and saved successfully',
+      data: result,
+    });
+
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message, error: err });
+  }
+};
+
 export const PaymentController = {
   createPaymentIntent,
-  confirmPayment
+  confirmPayment,
+  confirmationService
 };

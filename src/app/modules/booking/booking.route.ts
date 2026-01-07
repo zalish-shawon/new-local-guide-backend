@@ -25,4 +25,10 @@ router.patch(
   BookingController.updateStatus
 );
 
+router.post(
+  '/create-payment-intent',
+  auth('tourist'),
+  BookingController.createPaymentIntent
+);
+
 export const BookingRoutes = router;
