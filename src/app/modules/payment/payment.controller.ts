@@ -3,7 +3,7 @@ import { PaymentService } from './payment.service';
 import { Booking } from '../booking/booking.model';
 import { Payment } from './payment.model';
 
-// 1. Create Payment Intent (Used by Frontend to show Payment Form)
+// 1. Create Payment Intent (Used by Frontend to start payment)
 const createPaymentIntent = async (req: Request, res: Response) => {
   try {
     const { bookingId } = req.body;
@@ -19,57 +19,29 @@ const createPaymentIntent = async (req: Request, res: Response) => {
   }
 };
 
-// Let's add a manual "Confirm Payment" endpoint that Frontend calls after Stripe success.
+// 2. Confirm Payment (Called by Frontend after Stripe success)
 const confirmPayment = async (req: Request, res: Response) => {
-    try {
-        const { bookingId, transactionId } = req.body;
-
-        // Update Booking
-        await Booking.findByIdAndUpdate(bookingId, { status: 'confirmed' });
-        
-        // Create Payment Record
-        await Payment.create({
-            bookingId,
-            transactionId,
-            amount: 0, // You might want to fetch real amount or pass it
-            status: 'paid'
-        });
-
-        res.status(200).json({
-            success: true,
-            message: 'Payment confirmed successfully',
-            data: {}
-        });
-    } catch (err: any) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-}
-
-
-const confirmationService = async (req: Request, res: Response) => {
   try {
     const { transactionId, bookingId, status } = req.body;
 
-    // 1. 🔍 FIND THE BOOKING FIRST
-    // We need to find the booking to know how much money was actually paid.
+    // 1. Find the booking to get the REAL price
     const booking = await Booking.findById(bookingId);
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }
 
-    // 2. 🚨 CRITICAL FIX: Get the price from the Booking
-    // If we don't do this, it defaults to 0
+    // 2. Get the price from the Booking (Prevent 0 amount bug)
     const realAmount = booking.totalPrice || 0; 
 
-    // 3. Create the Payment Record with the REAL Amount
+    // 3. Create the Payment Record
     const result = await Payment.create({
       bookingId,
       transactionId,
       status: status || 'paid',
-      amount: realAmount, // <--- THIS WAS MISSING OR 0 BEFORE
+      amount: realAmount, // <--- Correct Amount Saved Here
     });
 
-    // 4. Update Booking Status to Confirmed (Optional, if not done elsewhere)
+    // 4. Update Booking Status
     await Booking.findByIdAndUpdate(bookingId, { 
       status: 'confirmed', 
       isPaid: true,
@@ -89,6 +61,5 @@ const confirmationService = async (req: Request, res: Response) => {
 
 export const PaymentController = {
   createPaymentIntent,
-  confirmPayment,
-  confirmationService
+  confirmPayment, 
 };
